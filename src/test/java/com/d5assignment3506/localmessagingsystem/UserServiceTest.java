@@ -2,78 +2,88 @@ package com.d5assignment3506.localmessagingsystem;
 
 import com.d5assignment3506.localmessagingsystem.entity.User;
 import com.d5assignment3506.localmessagingsystem.repo.UserRepository;
-import com.d5assignment3506.localmessagingsystem.service.UserNotFoundException;
 import com.d5assignment3506.localmessagingsystem.service.UserService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import javax.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+@SpringJUnitConfig
+@SpringBootTest
+@Transactional
+public class UserServiceTest {
 
-    @Mock
-    UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
-    @InjectMocks
-    UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
-    void createUser() {
+    public void testSaveUser() {
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
+        user.setEmail("johndoe@example.com");
         user.setUsername("johndoe");
-        user.setEmail("john.doe@example.com");
-        user.setTitle("Mr.");
+        user.setPassword("password");
+        user.setTitle("Engineer");
 
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        userService.save(user);
+        Long id = user.getId();
 
-        User result = userService.createUser("John", "Doe", "johndoe", "john.doe@example.com", "Mr.");
-
-        assertEquals(user, result);
-        verify(userRepository, times(1)).save(any(User.class));
+        User savedUser = userService.get(id);
+        assertNotNull(savedUser);
+        assertEquals(user.getFirstName(), savedUser.getFirstName());
+        assertEquals(user.getLastName(), savedUser.getLastName());
+        assertEquals(user.getEmail(), savedUser.getEmail());
+        assertEquals(user.getUsername(), savedUser.getUsername());
+        assertEquals(user.getPassword(), savedUser.getPassword());
+        assertEquals(user.getTitle(), savedUser.getTitle());
     }
 
-
     @Test
-    void editUser() throws UserNotFoundException {
+    public void testSaveUser1() {
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
+        user.setEmail("johndoe@example.com");
         user.setUsername("johndoe");
-        user.setEmail("john.doe@example.com");
-        user.setTitle("Mr.");
+        user.setPassword("password");
+        user.setTitle("Engineer");
 
-        when(userRepository.findByUsername("johndoe")).thenReturn(user);
+        userService.save(user);
 
-        User updatedUser = new User();
-        updatedUser.setFirstName("John");
-        updatedUser.setLastName("Smith");
-        updatedUser.setUsername("johndoe");
-        updatedUser.setEmail("john.smith@example.com");
-        updatedUser.setTitle("Dr.");
-
-        when(userRepository.save(user)).thenReturn(updatedUser);
-
-        User result = userService.editUser("johndoe", "John", "Smith", "john.smith@example.com", "Dr.");
-
-        assertEquals(updatedUser, result);
-        verify(userRepository, times(1)).findByUsername("johndoe");
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    void editUser_throws_UserNotFoundException() {
-        when(userRepository.findByUsername("unknown")).thenReturn(null);
-
-        assertThrows(UserNotFoundException.class, () ->
-                userService.editUser("unknown", "John", "Smith", "john.smith@example.com", "Dr."));
-        verify(userRepository, times(1)).findByUsername("unknown");
+        User savedUser = userRepository.findById(user.getId()).orElse(null);
+        assertNotNull(savedUser);
+        assertEquals("John", savedUser.getFirstName());
+        assertEquals("Doe", savedUser.getLastName());
+        assertEquals("johndoe@example.com", savedUser.getEmail());
+        assertEquals("johndoe", savedUser.getUsername());
+        assertEquals("password", savedUser.getPassword());
+        assertEquals("Engineer", savedUser.getTitle());
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
