@@ -1,4 +1,4 @@
-package com.d5assignment3506.localmessagingsystem.service.CheckService;
+package com.d5assignment3506.localmessagingsystem.entity.chatentity;
 
 import javax.persistence.*;
 import java.util.List;
